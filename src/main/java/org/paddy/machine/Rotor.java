@@ -3,6 +3,7 @@ package org.paddy.machine;
 import org.apache.log4j.Logger;
 
 import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Rotor {
@@ -91,56 +92,45 @@ public class Rotor {
             new AbstractMap.SimpleEntry<>("Y", "O"),//89
             new AbstractMap.SimpleEntry<>("Z", "J")//90
     );
+    private final Map<String, String> rotator1 = new HashMap<>();
+    private final Map<String, String> rotator2 = new HashMap<>();
+    private final Map<String, String> rotator3 = new HashMap<>();
+    public static final String SLIDING_ROTATOR = "Sliding rotator: ";
     private final int number;
     private final String initialLetter;
 
     public Rotor(int number, String initialLetter) {
         this.number = number;
         this.initialLetter = initialLetter;
-        LOGGER.info("Creating Rotor with letter: " + this.initialLetter);
+        LOGGER.info("Creating Rotor with letter: " + number + " " + this.initialLetter);
         int asciiVal = (int) initialLetter.charAt(0);
-        switch (number) {
-            case 0:
-                slideRotator1(asciiVal);
-                break;
-            case 1:
-                slideRotator2(asciiVal);
-                break;
-            case 2:
-                slideRotator3(asciiVal);
-                break;
-            default:
-                break;
+        LOGGER.info(SLIDING_ROTATOR + asciiVal);
+        slideRotator(asciiVal, number);
+    }
+
+    void slideRotator(int asciiVal, int number) {
+        int asciiOffset = 91 - (asciiVal - 65);
+        for (int i = 65; i <= 90; i++) {
+            asciiOffset = asciiOffset > 90 ? 65 : asciiOffset;
+            switch (number) {
+                case 0:
+                    //LOGGER.debug((char) i + " " + rotor1default.get(Character.toString((char) asciiOffset)));
+                    this.rotator1.put(rotor1default.get(Character.toString((char) asciiOffset)), Character.toString((char) i));
+                    break;
+                case 1:
+                    //LOGGER.debug((char) i + " " + rotor2default.get(Character.toString((char) asciiOffset)));
+                    this.rotator2.put(rotor2default.get(Character.toString((char) asciiOffset)), Character.toString((char) i));
+                    break;
+                case 2:
+                    //LOGGER.debug((char) i + " " + rotor3default.get(Character.toString((char) asciiOffset)));
+                    this.rotator3.put(rotor3default.get(Character.toString((char) asciiOffset)), Character.toString((char) i));
+                    break;
+                default:
+                    LOGGER.fatal("Should not happen!");
+                    break;
+            }
+            asciiOffset++;
         }
     }
 
-    void slideRotator1(int asciiVal) {
-        LOGGER.info("Sliding rotator: " + asciiVal);
-        int j = 91 - (asciiVal - 65);
-        for (int i = 65; i <= 90; i++) {
-            j = j > 90 ? 65 : j;
-            System.out.println(Character.toString((char) i) + " " + rotor1default.get(Character.toString((char) j)));
-            j++;
-        }
-    }
-
-    void slideRotator2(int asciiVal) {
-        LOGGER.info("Sliding rotator: " + asciiVal);
-        int j = 91 - (asciiVal - 65);
-        for (int i = 65; i <= 90; i++) {
-            j = j > 90 ? 65 : j;
-            System.out.println(Character.toString((char) i) + " " + rotor2default.get(Character.toString((char) j)));
-            j++;
-        }
-    }
-
-    void slideRotator3(int asciiVal) {
-        LOGGER.info("Sliding rotator: " + asciiVal);
-        int j = 91 - (asciiVal - 65);
-        for (int i = 65; i <= 90; i++) {
-            j = j > 90 ? 65 : j;
-            System.out.println(Character.toString((char) i) + " " + rotor3default.get(Character.toString((char) j)));
-            j++;
-        }
-    }
 }
