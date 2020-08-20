@@ -3,6 +3,7 @@
  */
 package org.paddy;
 
+import org.apache.log4j.Logger;
 import org.paddy.machine.Enigma;
 import org.paddy.machine.Rotor;
 
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class App {
+    private static final Logger LOGGER = Logger.getLogger(App.class);
     static final String[] LETTERS = new String[]{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
     public static final Set<String> LETTERSET = new HashSet<>(Arrays.asList(LETTERS));
 
@@ -22,16 +24,18 @@ public class App {
                 if (LETTERSET.contains(initialLetter)) {
                     rotors[i] = new Rotor(i, initialLetter);
                 } else {
-                    System.out.println("May only contain upper case letters of the alphabet!");
+                    LOGGER.info("May only contain upper case letters of the alphabet!");
                     System.exit(0);
                 }
             }
             final Enigma enigma = new Enigma(rotors);
             enigma.encrypt("ENIGMA");
+            //enigma.encrypt("HUBENQ");
             enigma.decrypt("GSPHDX");//DOG
             enigma.decrypt("QTRMGS");//CAT
         } else {
-            System.out.println("Usage: ./gradlew run --args='X Y Z'");
+            LOGGER.info("Usage: ./gradlew run --args='X Y Z'");
+            LOGGER.info("Where X Y Z may be upper case letters of the alphabet.");
         }
     }
 }

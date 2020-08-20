@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Rotor {
     private static final Logger LOGGER = Logger.getLogger(Rotor.class);
@@ -92,9 +93,8 @@ public class Rotor {
             new AbstractMap.SimpleEntry<>("Y", "O"),//89
             new AbstractMap.SimpleEntry<>("Z", "J")//90
     );
-    private final Map<String, String> rotator1 = new HashMap<>();
-    private final Map<String, String> rotator2 = new HashMap<>();
-    private final Map<String, String> rotator3 = new HashMap<>();
+    private final Map<String, String> rotatorEncode = new HashMap<>();
+    private final Map<String, String> rotatorDecode = new HashMap<>();
     public static final String SLIDING_ROTATOR = "Sliding rotator: ";
     private final int number;
     private final String initialLetter;
@@ -103,34 +103,72 @@ public class Rotor {
         this.number = number;
         this.initialLetter = initialLetter;
         LOGGER.info("Creating Rotor with letter: " + number + " " + this.initialLetter);
-        int asciiVal = (int) initialLetter.charAt(0);
-        LOGGER.info(SLIDING_ROTATOR + asciiVal);
-        slideRotator(asciiVal, number);
+        initRotor();
     }
 
-    void slideRotator(int asciiVal, int number) {
-        int asciiOffset = 91 - (asciiVal - 65);
-        for (int i = 65; i <= 90; i++) {
-            asciiOffset = asciiOffset > 90 ? 65 : asciiOffset;
-            switch (number) {
-                case 0:
-                    //LOGGER.debug((char) i + " " + rotor1default.get(Character.toString((char) asciiOffset)));
-                    this.rotator1.put(rotor1default.get(Character.toString((char) asciiOffset)), Character.toString((char) i));
-                    break;
-                case 1:
-                    //LOGGER.debug((char) i + " " + rotor2default.get(Character.toString((char) asciiOffset)));
-                    this.rotator2.put(rotor2default.get(Character.toString((char) asciiOffset)), Character.toString((char) i));
-                    break;
-                case 2:
-                    //LOGGER.debug((char) i + " " + rotor3default.get(Character.toString((char) asciiOffset)));
-                    this.rotator3.put(rotor3default.get(Character.toString((char) asciiOffset)), Character.toString((char) i));
-                    break;
-                default:
-                    LOGGER.fatal("Should not happen!");
-                    break;
-            }
-            asciiOffset++;
+    int setLetter(int lastOffset) {
+        lastOffset = lastOffset > 26 ? lastOffset - 26 : lastOffset;
+        int offset = (((int) this.initialLetter.charAt(0)) - 65) - lastOffset;
+        offset = offset < 0 ? offset + 26 : offset;
+        LOGGER.info(SLIDING_ROTATOR + offset);
+        rotateRotator(offset);
+        return offset;
+    }
+
+    void initRotor() {
+        switch (this.number) {
+            case 0:
+                this.rotatorEncode.putAll(rotor1default
+                        .entrySet()
+                        .stream()
+                        .collect((Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey))));
+                break;
+            case 1:
+                this.rotatorEncode.putAll(rotor2default
+                        .entrySet()
+                        .stream()
+                        .collect((Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey))));
+                break;
+            case 2:
+                this.rotatorEncode.putAll(rotor3default
+                        .entrySet()
+                        .stream()
+                        .collect((Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey))));
+                break;
+            default:
+                LOGGER.fatal("Should not happen!");
+                System.exit(-1);
+                break;
         }
     }
 
+    void rotateRotator(int offset) {
+        //LOGGER.info("Offset: " + offset);
+        final Map<String, String> rotatorEncodeNew = new HashMap<>();
+        String newEncode;
+        int j;
+        for (int i = 65; i <= 90; i++) {
+            j = i + offset > 90 ? (i + offset) - 26 : i + offset;
+            j = j < 65 ? j + 26 : j;
+            rotatorEncodeNew.put(Character.toString((char) i), this.rotatorEncode.get(Character.toString((char) j)));
+        }
+        this.rotatorEncode.clear();
+        this.rotatorEncode.putAll(rotatorEncodeNew);
+        this.rotatorDecode.putAll(this.rotatorEncode
+                .entrySet()
+                .stream()
+                .collect((Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey))));
+    }
+
+    void showCurrentRotatorMapping() {
+        LOGGER.info("Current Rotator:");
+        rotatorDecode.forEach((k, v) -> System.out.println((k + ":" + v)));
+        System.out.println("----");
+        rotatorEncode.forEach((k, v) -> System.out.println((k + ":" + v)));
+        System.out.println("----");
+    }
+
+    public String encryptLetter(String letter) {
+        return this.rotatorEncode.get(letter);
+    }
 }
